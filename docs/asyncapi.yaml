@@ -1,0 +1,89 @@
+asyncapi: 2.6.0
+info:
+  title: CloudLog · Eventos de Entrega
+  version: 1.0.0
+  description: |
+    Eventos publicados pelo Microserviço de Entregas no Azure Service Bus.
+    A Azure Function `processarEventoEntrega` consome a fila, calcula frete e prazo
+    e grava a estimativa de volta na entrega (enriquecimento de dados).
+    Alunos: Camilla Augusta Uber, João Davi, Laura Guillarducci.
+servers:
+  azure:
+    url: '{namespace}.servicebus.windows.net'
+    protocol: amqp
+    description: Namespace Azure Service Bus do CloudLog
+    variables:
+      namespace:
+        default: cloudlog-sb
+channels:
+  cloudlog-entregas-eventos:
+    description: Fila de eventos do domínio Entregas.
+    publish:
+      operationId: consumirEventoEntrega
+      summary: Consumido pela Azure Function processarEventoEntrega.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/DeliveryCreated'
+          - $ref: '#/components/messages/DeliveryUpdated'
+          - $ref: '#/components/messages/DeliveryDeleted'
+    subscribe:
+      operationId: publicarEventoEntrega
+      summary: Publicado pelo cloudlog-entregas-service a cada criação, alteração ou exclusão.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/DeliveryCreated'
+          - $ref: '#/components/messages/DeliveryUpdated'
+          - $ref: '#/components/messages/DeliveryDeleted'
+components:
+  messages:
+    DeliveryCreated:
+      name: DeliveryCreated
+      title: Entrega criada
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/DeliveryEvent'
+    DeliveryUpdated:
+      name: DeliveryUpdated
+      title: Entrega alterada (dados ou status)
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/DeliveryEvent'
+    DeliveryDeleted:
+      name: DeliveryDeleted
+      title: Entrega excluída
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/DeliveryEvent'
+  schemas:
+    DeliveryEvent:
+      type: object
+      required: [type, version, source, aggregateId, occurredAt, data]
+      properties:
+        type:
+          type: string
+          enum: [DeliveryCreated, DeliveryUpdated, DeliveryDeleted]
+        version:
+          type: integer
+          const: 1
+        source:
+          type: string
+          const: cloudlog-entregas-service
+        aggregateId:
+          type: string
+          format: uuid
+        occurredAt:
+          type: string
+          format: date-time
+        data:
+          type: object
+          properties:
+            id: { type: string }
+            code: { type: string, example: ENT-1001 }
+            customer: { type: string }
+            origin: { type: string }
+            destination: { type: string }
+            weightKg: { type: number }
+            distanceKm: { type: number }
+            status:
+              type: string
+              enum: [Pendente, Em rota, Atrasada, Entregue, Cancelada]

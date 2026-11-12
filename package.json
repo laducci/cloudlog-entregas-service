@@ -1,0 +1,34 @@
+{
+  "name": "cloudlog-entregas-service",
+  "version": "1.0.0",
+  "description": "CloudLog - Microserviço de Entregas (MongoDB Atlas) com Clean Architecture + Vertical Slice",
+  "private": true,
+  "main": "dist/API/server.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/API/server.js",
+    "dev": "tsc -p tsconfig.build.json && node dist/API/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run tests/unit tests/api",
+    "test:arch": "vitest run tests/architecture"
+  },
+  "dependencies": {
+    "@azure/service-bus": "^7.9.5",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mongodb": "^6.12.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.0",
+    "@types/supertest": "^6.0.2",
+    "@types/swagger-ui-express": "^4.1.7",
+    "archunit": "^2.5.4",
+    "supertest": "^7.0.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
